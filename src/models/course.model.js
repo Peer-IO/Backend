@@ -8,7 +8,6 @@ const courseSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			trim: true,
-			maxlength: 50,
 		},
 		code: {
 			type: String,
@@ -32,11 +31,6 @@ const courseSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
-		classCode: {
-			type: String,
-			required: true,
-			unique: true
-		}
 	},
 	{
 		timestamps: true

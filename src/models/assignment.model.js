@@ -1,36 +1,42 @@
 import mongoose from "mongoose";
-import { Course } from "./course.model";
 import { taskSchema } from "./schemas/task.schema";
+import { crudControllers } from "../services/crud";
+import { Submission } from "./submission.model";
+import { Review } from "./review.model";
 const assignmentSchema = new mongoose.Schema(
 	{
 		title: {
 			type: String,
-			required: true,
 			trim: true,
-			maxlength: 100 // to be defined later on.
+			required: true
+		},
+		description: {
+			type: String,
+			trim: true,
 		},
 		course: {
 			type: mongoose.Types.ObjectId,
 			ref: "Course"
 		},
 		tasks: [taskSchema],
-		submissions: {
-			type: [mongoose.Types.ObjectId],
+		submissions: [{
+			type: mongoose.Types.ObjectId,
 			ref: "Submission",
-		},
+		}],
 	}
 );
 
-// updating the related course with assignment id.
-assignmentSchema.post("save",async function(next) {
+assignmentSchema.pre("deleteOne", { document: true, query: false }, async function(next) {
+	const promiseArray = [];
 	try {
-		let relatedCourse = await Course.findById(this.course);
-		relatedCourse.assignments.push(this._id);
-		await relatedCourse.save();
-		next();
-	}catch(err) {
+		promiseArray.push(Submission.deleteMany({assignment: this._id}));
+		promiseArray.push(Review.deleteMany({assignment: this._id}));
+		await Promise.all(promiseArray);
+	} catch(err) {
 		next(err);
 	}
+	next();
 });
-
 export const Assignment = mongoose.model("Assignment", assignmentSchema);
+
+export default crudControllers(Assignment);

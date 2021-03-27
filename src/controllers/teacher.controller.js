@@ -7,7 +7,6 @@ export const createCourse = async (req, res, next) => {
 		return res.status(400).json({ "error": "Name and Code are necessary" });
 	if (!req.user.teacher)
 		return res.status(401).json({ "error": "Only Teachers can create course" });
-
 	const validateCode = req.body.code.search(/[^\w\s-]/);
 	if (validateCode !== -1)
 		return res.status(400).json({ "error": "Course Code can contain only alphanumeric and hyphen" });
@@ -17,7 +16,7 @@ export const createCourse = async (req, res, next) => {
 
 	try {
 		let ta = [];
-		if (req.body.ta) {
+		if (req.body.ta.length) {
 			ta = await Promise.all(req.body.ta.map(email => User.findOne({ email }).select("_id").exec()));
 			ta = ta.filter(Boolean);
 			ta = ta.map(val => val._id);
@@ -75,9 +74,14 @@ export const updateCourse = async (req, res, next) => {
 };
 
 export const deleteCourse = async (req, res, next) => {
-	const searchParam = { instructor: req.user._id, classCode: req.params.code };
-	await courseCrud.removeOne({ findBy: searchParam }).catch(next);
-	return res.sendStatus(204);
+	const searchParam = { instructor: req.user._id, code: req.params.code };
+	try {
+		let course = await courseCrud.getOneDoc({ findBy: { ...searchParam } });
+		await course.deleteOne();
+		return res.sendStatus(204);
+	} catch(err) {
+		return next(err);
+	}
 };
 
 async function generateClassCode () {
