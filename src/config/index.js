@@ -23,5 +23,3 @@ switch (env) {
 }
 
 export default merge(baseConfig, envConfig);
-
-console.log(merge(baseConfig, envConfig));

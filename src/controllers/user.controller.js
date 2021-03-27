@@ -1,4 +1,4 @@
-import { User } from "./user.model";
+import { User } from "../models/user.model";
 
 export const me = (req, res) => {
   res.json({ data: req.user }).sendStatus(200);

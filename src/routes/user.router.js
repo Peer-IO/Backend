@@ -1,6 +1,6 @@
-import { me, updateMe } from "./user.controller";
+import { me, updateMe } from "../controllers/user.controller";
 import { Router } from "express";
-import { protect } from "../../utils/auth";
+import { protect } from "../utils/auth";
 
 const router = Router();
 

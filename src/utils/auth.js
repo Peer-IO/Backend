@@ -1,5 +1,5 @@
 import config from "../config";
-import { User } from "../routes/user/user.model";
+import { User } from "../models/user.model";
 import jwt from "jsonwebtoken";
 import { auth } from "./firebase";
 

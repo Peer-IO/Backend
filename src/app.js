@@ -11,8 +11,8 @@ import compression from "compression";
 import { connect } from "./utils/db";
 
 //routers
-import auth from "./routes/auth/auth.router";
-import user from "./routes/user/user.router";
+import auth from "./routes/auth.router";
+import user from "./routes/user.router";
 
 const app = express();
 
@@ -53,8 +53,8 @@ app.use(function (err, req, res, next) {
 
 export const start = ({ port, dbURL }) => {
   app.listen(port, () => {
-    console.log(`server on port ${port}`);
+    console.log("*\tStarting Server");
+    console.log(`*\tPort: ${port}`);
   });
-
   connect(dbURL);
 };

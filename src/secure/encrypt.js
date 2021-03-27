@@ -22,6 +22,6 @@ function encrypt({ file, password }) {
 }
 
 const [filePath, password] = process.argv.slice(2);
-const file = path.join(__dirname, filePath);
+const file = path.join(__dirname, `../../${filePath}`);
 
 encrypt({ file: file, password: password });
