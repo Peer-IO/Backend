@@ -7,7 +7,8 @@
     "dev": "nodemon --exec yarn run babel-node -- ./src/index.js",
     "restart": "rimraf dist && yarn run start",
     "serve": "node dist/firebase_decrypt.js && node dist/index.js",
-    "start": "yarn run build && yarn run serve"
+    "start": "yarn run build && yarn run serve",
+    "test": "cross-env NODE_ENV=testing jest --forceExit --detectOpenHandles  --silent --coverage"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -32,10 +33,26 @@
     "@babel/plugin-transform-arrow-functions": "^7.10.4",
     "@babel/preset-env": "^7.0.0",
     "babel-core": "7.0.0-bridge.0",
+    "cross-env": "^7.0.2",
+    "cuid": "^2.1.8",
+    "jest": "^26.4.2",
     "nodemon": "^2.0.4",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "supertest": "^4.0.2"
   },
   "engines": {
     "node": "12.x"
+  },
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost/",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test-db-setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "dist/"
+    ],
+    "restoreMocks": true
   }
 }

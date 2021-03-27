@@ -6,7 +6,7 @@ import { auth } from "../utils/firebase";
 // verify firebase token and email verification then only sign in user
 export const verifyIDToken = async (req, res, next) => {
   const idToken = req.body.idToken;
-  if (!idToken) return res.status(400).json({ message: "Token not provided" });
+  if (!idToken) return res.status(401).json({ message: "Token not provided" });
   try {
     const decodedToken = await auth.verifyIdToken(idToken);
 
