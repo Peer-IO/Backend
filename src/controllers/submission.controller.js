@@ -1,6 +1,7 @@
 import submissionCrud, { Submission } from "../models/submission.model";
 import courseCrud from "../models/course.model";
 import assignmentCrud from "../models/assignment.model";
+import { isSubmissionUpdatable } from "../services/controller";
 
 export const createSubmission = async (req, res) => {
 	const user = req.user;
@@ -12,15 +13,21 @@ export const createSubmission = async (req, res) => {
 	const assignment = await assignmentCrud.getOneDoc({ findBy: { _id: req.body.assignment} });
 	if(!assignment)
 		return res.status(400).json({message: "Assignment not found."});
+	console.log("assignment:", assignment);
 	console.log(assignment.course.toString());
 	console.log(req.body.course);
 	if(assignment.course.toString() !== req.body.course)
 		return res.status(400).json({error: "Assignment not found in course."});
-	try {
-		const submission = await submissionCrud.createOne({body:{...req.body, submitter: user._id, reviews: []}});
-		return res.status(201).json(submission);
-	} catch(err) {
-		return res.status(400).json({error: err.message});
+	const submissionDeadline = new Date(assignment.submissionDeadline.toString());
+	if(submissionDeadline >= new Date()) {
+		try {
+			const submission = await submissionCrud.createOne({body:{...req.body, submitter: user._id, reviews: []}});
+			return res.status(201).json(submission);
+		} catch(err) {
+			return res.status(400).json({error: err.message});
+		}
+	} else {
+		return res.status(403).json({error: "Submission deadline is over."});
 	}
 };
 export const getSubmission = async (req, res) => {
@@ -42,7 +49,6 @@ export const getSubmission = async (req, res) => {
 				console.log("1");
 				findBy.submitter = req.user._id;
 				console.table(findBy);
-				// populate({path:"ta", select:"first_name email -_id"}).populate({path:"instructor",select:"first_name email -_id"});
 				const submissions = await Submission.find(findBy).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
 				return res.status(200).json(submissions);
 			} else if(courseId && assignmentId) {
@@ -61,10 +67,14 @@ export const getSubmission = async (req, res) => {
 			} else if(courseId && assignmentId) {
 				// return all the submissions for a given course and given assignment.
 				console.log("4");
-				findBy.course = courseId;
-				findBy.assignment = assignmentId;
-				const submissions = await Submission.find(findBy).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
-				res.status(200).json(submissions);
+				if(req.user.teacher) {
+					findBy.course = courseId;
+					findBy.assignment = assignmentId;
+					const submissions = await Submission.find(findBy).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
+					return res.status(200).json(submissions);
+				} else {
+					return res.status(400).json({error: "Only available to instructor."});
+				}
 			}
 		} else {
 			res.statusCode = 400;
@@ -80,14 +90,30 @@ export const deleteSubmission = async(req, res) => {
 		const submission = await submissionCrud.getOneDoc({findBy: {_id: submissionId}});
 		const submitterId = submission.submitter.toString();
 		const userId = req.user._id.toString();
-		if(submitterId === userId) {
-			submission.deleteOne();
-			res.statusCode = 204;
-			return res.send();
+		if(submitterId === userId){
+			const assignment = await assignmentCrud.getOne({findBy: {_id: req.body.assignment}});
+			if(assignment) {
+				if(submission && assignment._id.toString() === submission.assignment.toString()) {
+					if(isSubmissionUpdatable(assignment)) {
+						await submissionCrud.getOneDoc({findBy: {_id: submissionId}});
+						submission.deleteOne();
+						res.statusCode = 204;
+						return res.send();
+					} else {
+						return res.status(403).json({error: "Submission Deadline is over."});
+					}
+				} else {
+					console.log("submission:", submission);
+					return res.status(400).json({error: "Submission is not for given assignment."});
+				}
+			} else {
+				return res.status(404).json({error: "Assignment does not exists."});
+			}
 		} else {
-			return res.status(400).json({error: "Only submitter can delete."});
+			return res.status(400).json({error: "Only submitter can delete the submission."});
 		}
 	} catch(err) {
+		console.log(err);
 		return res.status(400).json({error: err.message});
 	}
 };
@@ -107,13 +133,30 @@ export const getSingleSubmission = async (req, res) => {
 
 export const updateSubmission = async (req, res) => {
 	try {
-		if(req.params.id === req.user_id.toString()){
-			const updatedSubmission = await Submission.findByIdAndUpdate({_id: req.params.id}, {"$set" : {attachments: req.body.attachments}}, {new: true});
-			return res.status(200).json(updatedSubmission);
+		const submission = await submissionCrud.getOne({findBy: {_id: req.params.id}});
+		const submitterId = submission.submitter.toString();
+		if(submitterId === req.user._id.toString()){
+			const assignment = await assignmentCrud.getOne({findBy: {_id: req.body.assignment}});
+			if(assignment) {
+				if(submission && assignment._id.toString() === submission.assignment.toString()) {
+					if(isSubmissionUpdatable(assignment)) {
+						const updatedSubmission = await Submission.findByIdAndUpdate({_id: req.params.id}, {"$set" : {attachments: req.body.attachments}}, {new: true});
+						return res.status(200).json(updatedSubmission);
+					} else {
+						return res.status(403).json({error: "Submission Deadline is over."});
+					}
+				} else {
+					console.log("submission:", submission);
+					return res.status(400).json({error: "Submission is not for given assignment."});
+				}
+			} else {
+				return res.status(404).json({error: "Assignment does not exists."});
+			}
 		} else {
 			return res.status(400).json({error: "Only submitter can update the submission."});
 		}
 	} catch(err) {
+		console.log(err);
 		return res.status(400).json({error: err.message});
 	}
 };

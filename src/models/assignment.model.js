@@ -33,6 +33,11 @@ const assignmentSchema = new mongoose.Schema(
 			type: [
 				String
 			]
+		},
+		number_of_submissions: {
+			type: Number,
+			default: 0,
+			min: 0
 		}
 	}, {timestamps: true}
 );

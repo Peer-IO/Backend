@@ -77,8 +77,12 @@ export const deleteCourse = async (req, res, next) => {
 	const searchParam = { instructor: req.user._id, _id: req.params.code };
 	try {
 		let course = await courseCrud.getOneDoc({ findBy: { ...searchParam } });
-		await course.deleteOne();
-		return res.sendStatus(204);
+		if(course.instructor.toString() === req.user._id.toString() && req.user.teacher) {
+			await course.deleteOne();
+			return res.sendStatus(204);
+		} else {
+			return res.status(403).json({error: "Only instructor can delete the course."});
+		}
 	} catch(err) {
 		return next(err);
 	}

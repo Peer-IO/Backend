@@ -12,11 +12,23 @@ export const getAllAssignments = async (req, res, next) => {
 
 export const addAssignment = async (req, res) => {
 	try {
-		const newAssignment = await assignmentCrud.createOne({body: req.body});
-		const course = await courseCrud.getOneDoc({ findBy: { _id: req.query.courseId } });
-		course.assignments.push(newAssignment._id);
-		await course.save();
-		return res.status(201).json(newAssignment);
+		if(req.user.teacher) {
+			const course = await courseCrud.getOneDoc({ findBy: { _id: req.query.courseId } });
+			if(course) {
+				if(course.instructor.toString() === req.user._id.toString()){
+					const newAssignment = await assignmentCrud.createOne({body: {...req.body, course: req.query.courseId}});
+					course.assignments.push(newAssignment._id);
+					await course.save();
+					return res.status(201).json(newAssignment);
+				} else {
+					return res.status(403).json({error: "You are not instructor of this course."});
+				}
+			} else {
+				return res.status(404).json({error: "course not found."});
+			}
+		} else {
+			return res.status(403).json({error: "Only instructor can add assignment."});
+		}
 	} catch(err) {
 		return res.status(400).json({error: err.message});
 	}

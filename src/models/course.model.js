@@ -4,8 +4,6 @@ import uniqueValidator from "mongoose-unique-validator";
 import { Assignment } from "./assignment.model";
 import { Submission } from "./submission.model";
 import { Review } from "./review.model";
-import { User } from "./user.model";
-
 const courseSchema = new mongoose.Schema(
 	{
 		name: {
@@ -51,8 +49,7 @@ courseSchema.pre("deleteOne", { document: true, query: false }, async function(n
 	try {
 		promiseArray.push(Assignment.deleteMany({course: this._id}));
 		promiseArray.push(Submission.deleteMany({course: this._id}));
-		promiseArray.push(Review.deleteMany({ course: this._id }));
-		promiseArray.push(User.updateMany({ courses: this._id }, { $pull: { courses: this._id } }));
+		promiseArray.push(Review.deleteMany({course: this._id}));
 		await Promise.all(promiseArray);
 	} catch(err) {
 		next(err);
