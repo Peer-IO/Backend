@@ -1,17 +1,20 @@
-import { User } from "../models/user.model";
+import userCrud from "../models/user.model";
 
 export const me = (req, res) => {
-  res.json({ data: req.user }).sendStatus(200);
+  return res.status(200).send({ data: req.user });
 };
 
 export const updateMe = async (req, res) => {
+  // prevent user from resetting id and verification status
+  delete req.body.email_verified;
+  delete req.body._id;
   try {
-    const user = await User.findByIdAndUpdate(req.user._id, req.body, {
-      new: true,
-    })
-      .lean()
-      .exec();
-    res.json({ data: user }).sendStatus(204);
+    const user = await userCrud.updateOne({
+      findBy: { _id: req.user._id },
+      updateBody: req.body,
+    });
+
+    return res.status(200).send({ data: user });
   } catch (e) {
     console.error(e);
     res.status(400).end();

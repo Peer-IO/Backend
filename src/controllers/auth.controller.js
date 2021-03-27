@@ -1,33 +1,53 @@
-import config from "../config";
-import { User } from "../models/user.model";
-import jwt from "jsonwebtoken";
+import { newToken } from "../services/auth";
+import userCrud from "../models/user.model";
 
-// generate new jwt token
-const newToken = (user) => {
-  return jwt.sign({ id: user._id }, config.secrets.jwt, {
-    expiresIn: config.secrets.jwtExp,
-  });
-};
-
-// find user using uid in request body
 export const signin = async (req, res) => {
-  const user = User.find({ uid: req.body.uid }).select("-uid").lean().exec();
-  if (!user) return res.status(404).send("User not registered");
-  const token = newToken(user);
-  return res.status(201).send({ token });
+  try {
+    // find user using uid in request body
+    let user = await userCrud.findOne({ findBy: { uid: req.body.uid } });
+
+    // user doesn't exist 404
+    if (!user) return res.status(404).send("User not registered");
+    // user isn't verified 401
+    if (!req.body.email_verified)
+      return res.status(401).json({ message: "User not Verified" });
+
+    // update user status
+    user = await userCrud.updateOne({
+      findBy: { _id: req.user._id },
+      updateBody: { email_verified: true },
+    });
+
+    const token = newToken(user);
+    return res.status(201).send({ token });
+  } catch (e) {
+    next(e);
+  }
 };
 
 //
 export const signup = async (req, res) => {
-  if (!req.body.first_name || !req.body.email || !req.body.institution)
+  // data not complete return  400
+  if (!req.body.first_name || !req.body.institution || !req.body.roll_number)
     return res.status(400).send({ message: "Incomplete data provided" });
 
   try {
-    const data = await User.create(req.body);
+    // check if user with same email, uid already exists
+    if (
+      await userCrud.getOne({
+        findBy: {
+          $or: [{ email: req.body.email }, { uid: req.body.uid }],
+        },
+      })
+    )
+      return res.status(400).json({ message: "User already exists" });
+
+    // create user
+    const data = await userCrud.createOne({ body: req.body });
     const token = newToken(data);
     return res.status(201).send({ token });
   } catch (error) {
     console.log(error);
-    return res.status(400);
+    return res.sendStatus(400);
   }
 };

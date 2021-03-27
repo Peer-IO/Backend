@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { signin, signup } from "../controllers/auth.controller";
-import { verifyIDToken } from "../utils/auth";
+import { verifyIDToken } from "../services/auth";
 
 const router = Router();
 

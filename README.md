@@ -1,4 +1,4 @@
-# NodeJS API for [P2P](https://github.com/king-11/P2P)
+# NodeJS API
 
 ## Getting started
 
@@ -25,8 +25,7 @@ This is a REST API written using blazing fast implementation of Chrome's V8 Engi
 
 API is located at: <https://arcane-mountain-95630.herokuapp.com/>
 
-Depolyment is also linked to a VueJS project that shows how this API can be integrated to a frontend that is able to consume an API.  
-Repo is here: <https://github.com/king-11/P2P>
+Depolyment is also linked to a VueJS project that shows how this API can be integrated to a frontend that is able to consume an API.
 
 ## How to install
 
@@ -35,7 +34,7 @@ Repo is here: <https://github.com/king-11/P2P>
 1. Clone the project from github. Change "myproject" to your project name.
 
 ```bash
-git clone https://github.com/king-11/P2P_Backend.git ./myproject
+git clone https://github.com/Peer-IO/Backend.git ./myproject
 ```
 
 ### Using manual download ZIP

@@ -1,6 +1,6 @@
 import { me, updateMe } from "../controllers/user.controller";
 import { Router } from "express";
-import { protect } from "../utils/auth";
+import { protect } from "../services/auth";
 
 const router = Router();
 

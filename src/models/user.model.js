@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { crudControllers } from "../services/crud";
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      immutable: true,
     },
     institution: {
       type: String,
@@ -38,16 +40,22 @@ const userSchema = new mongoose.Schema(
     roll_number: {
       type: Number,
       required: false,
-      unique: true,
       maxlength: 11,
     },
     uid: {
       required: true,
       type: String,
       unique: true,
+      immutable: true,
+    },
+    email_verified: {
+      type: Boolean,
+      required: true,
     },
   },
   { timestamps: true }
 );
 
 export const User = mongoose.model("user", userSchema);
+
+export default crudControllers(User);
