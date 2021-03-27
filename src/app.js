@@ -6,6 +6,7 @@ import { json, urlencoded } from "body-parser";
 import logger from "morgan";
 import cors from "cors";
 import compression from "compression";
+import cookieParser from "cookie-parser";
 
 // db connect
 import { connect } from "./utils/db";
@@ -13,8 +14,9 @@ import { connect } from "./utils/db";
 //routers
 import auth from "./routes/auth.router";
 import user from "./routes/user.router";
+import refreshToken from "./routes/token.router";
 
-const app = express();
+export const app = express();
 
 // remove powered by cookie
 app.disable("x-powered-by");
@@ -32,9 +34,12 @@ app.use(urlencoded({ extended: true }));
 app.use(compression());
 // static file storage
 app.use(express.static(path.join(__dirname, "public")));
+// use cookie-parser for refresh token
+app.use(cookieParser());
 
 app.use("/auth", auth);
 app.use("/user", user);
+app.use("/refresh", refreshToken);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.set("toJSON", {
+  versionKey: false,
+});
+
 export const User = mongoose.model("user", userSchema);
 
 export default crudControllers(User);

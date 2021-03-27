@@ -15,6 +15,7 @@ switch (env) {
     envConfig = require("./dev").config;
     break;
   case "Prod":
+  case "production":
   case "Production":
     envConfig = require("./production").config;
     break;
