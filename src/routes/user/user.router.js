@@ -1,9 +1,11 @@
-import {me , updateMe} from './user.controller'
-import { Router } from 'express'
+import { me, updateMe } from "./user.controller";
+import { Router } from "express";
+import { protect } from "../../utils/auth";
 
-const router = Router()
+const router = Router();
 
-router.get('/', me)
-router.put('/', updateMe)
+router.use(protect);
+router.get("/", me);
+router.put("/", updateMe);
 
-export default router
+export default router;

@@ -6,6 +6,11 @@ import { json, urlencoded } from "body-parser";
 import logger from "morgan";
 import cors from "cors";
 import { connect } from "./utils/db";
+import compression from "compression";
+
+//routers
+import auth from "./routes/auth/auth.router";
+import user from "./routes/user/user.router";
 
 const app = express();
 
@@ -19,12 +24,15 @@ app.use(cors({ origin: true }));
 app.use(logger("dev"));
 // using bodyparser to parse json bodies into js objects
 app.use(json());
+// body parsing urlencoded data
 app.use(urlencoded({ extended: true }));
+// compress response
+app.use(compression());
+// static file storage
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
-  return res.json({ message: "hello there i am working" }).sendStatus(200);
-});
+app.use("/auth", auth);
+app.use("/user", user);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
