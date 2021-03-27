@@ -74,7 +74,7 @@ export const updateCourse = async (req, res, next) => {
 };
 
 export const deleteCourse = async (req, res, next) => {
-	const searchParam = { instructor: req.body.user._id, code: req.params.code };
+	const searchParam = { instructor: req.user._id, code: req.params.code };
 	try {
 		let course = await courseCrud.getOneDoc({ findBy: { ...searchParam } });
 		await course.deleteOne();

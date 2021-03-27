@@ -1,47 +1,31 @@
 import mongoose from "mongoose";
-import { User } from "./user.model";
-import { Assignment } from "./assignment.model";
 import { Review } from "./review.model";
+import { crudControllers } from "../services/crud";
 
 const submissionSchema = new mongoose.Schema({
 	course: {
 		type: mongoose.Types.ObjectId,
-		ref: "Course"
+		ref: "Course",
+		required: true
 	},
 	assignment: {
 		type: mongoose.Types.ObjectId,
-		ref: "Assignment"
+		ref: "Assignment",
+		required: true
 	},
 	submitter: {
 		type: mongoose.Types.ObjectId,
-		ref: "User"
+		ref: "User",
+		required: true
 	},
 	reviews: [{
 		type: mongoose.Types.ObjectId,
-		ref: "Review"
+		ref: "Review",
+		required: true
 	}],
 	attachments: [{
 		type: String, // to store the links for the attatchments of a submission in same sequence as those of task.
 	}]
-});
-
-// updating the related assignment and user with submission id.
-submissionSchema.post("save", async function (next) {
-	try {
-		let student = await User.findById(this.submitter);
-		student.submissions.push(this._id);
-		await student.save();
-	}catch(err) {
-		next(err);
-	}
-	try {
-		let assign = await Assignment.findById(this.assignment);
-		assign.submissions.push(assign);
-		await assign.save();
-		next();
-	} catch(err) {
-		next(err);
-	}
 });
 // Removing the reviews for the submission if it is deleted.
 submissionSchema.pre("deleteOne", { document: true, query: false }, async function(next) {
@@ -53,3 +37,5 @@ submissionSchema.pre("deleteOne", { document: true, query: false }, async functi
 	next();
 });
 export const Submission = mongoose.model("Submission", submissionSchema);
+
+export default crudControllers(Submission);

@@ -75,3 +75,22 @@ export const newToken = (user) => {
 		expiresIn: config.secrets.jwtExp,
 	});
 };
+
+
+// (async function temp() {
+// 	const body = {
+// 		"first_name":"meluhan",
+// 		"last_name":"Tiwari",
+// 		"institution":"KCNIT",
+// 		"email":"purushottammisc.com",
+// 		"roll_number":19074023,
+// 		"email_verified": true
+// 	};
+// 	try {
+// 		const data = await userCrud.createOne({"body": body});
+// 		const token = newToken(data);
+// 		console.log("token =", token);
+// 	} catch(err) {
+// 		console.log("error =", err.message);
+// 	}
+// }());

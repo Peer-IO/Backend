@@ -54,8 +54,3 @@ export const updateAssignment = async (req, res, next) => {
 		next(err);
 	}
 };
-
-export const forbidden = async (req, res) => {
-	res.statusCode = 403;
-	res.send("Endpoint not supported.");
-};

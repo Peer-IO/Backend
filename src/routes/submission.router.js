@@ -1,12 +1,6 @@
 import { Router } from "express";
-import {
-	addAssignment,
-	getAssignment,
-	updateAssignment,
-	getAllAssignments,
-	deleteAssignment,
-} from "../controllers/assignment.controller";
 import { protect } from "../services/auth";
+import { getSubmission, createSubmission, deleteSubmission, getSingleSubmission, updateSubmission } from "../controllers/submission.controller";
 import { forbidden } from "../services/controller";
 
 const router = Router();
@@ -15,15 +9,18 @@ router.use(protect);
 
 router
 	.route("/")
-	.get(getAllAssignments)
+	.get(getSubmission)
 	.put(forbidden)
-	.post(addAssignment)
+	.post(createSubmission)
 	.delete(forbidden);
+
 router
 	.route("/:id")
-	.get(getAssignment)
-	.put(updateAssignment)
+	.get(getSingleSubmission)
+	.put(updateSubmission)
 	.post(forbidden)
-	.delete(deleteAssignment);
+	.delete(deleteSubmission);
+
+router.use(protect);
 
 export default router;

@@ -17,10 +17,6 @@ const assignmentSchema = new mongoose.Schema(
 			type: mongoose.Types.ObjectId,
 			ref: "Course"
 		},
-		submissions: [{
-			type: mongoose.Types.ObjectId,
-			ref: "Submission",
-		}],
 		totalPoints: {
 			type: Number,
 			required: true

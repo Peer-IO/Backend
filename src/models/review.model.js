@@ -19,10 +19,13 @@ const reviewSchema = new mongoose.Schema({
 		type: mongoose.Types.ObjectId,
 		ref: "User",
 	},
+	remark: {
+		type: String,
+		required: true,
+		trim: true
+	},
 	scores: {
-		type: Array /* scores to be stored in order [[crtron-1, crtron-2, ...], -> task-1 scores
-                            criterion scores  <-  [crtron-1, crtron-2, ...], -> task-2 scores
-                                                  ... ]*/,
+		type: Number,
 		required: true,
 	},
 });

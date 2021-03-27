@@ -17,6 +17,7 @@ import user from "./routes/user.router";
 import refreshToken from "./routes/token.router";
 import teacher from "./routes/teacher.router";
 import assignment from "./routes/assignment.router";
+import submission from "./routes/submission.router";
 
 export const app = express();
 
@@ -44,6 +45,7 @@ app.use("/user", user);
 app.use("/refresh", refreshToken);
 app.use("/teacher", teacher);
 app.use("/assignment", assignment);
+app.use("/submission", submission);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
