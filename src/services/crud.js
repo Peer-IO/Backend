@@ -22,6 +22,8 @@ export const updateOne = (model) => ({ findBy, updateBody }) => {
 		.findOneAndUpdate({ ...findBy }, update, {
 			new: true,
 			useFindAndModify: false,
+			runValidators: true,
+			context: "query",
 		})
 		.lean()
 		.exec();

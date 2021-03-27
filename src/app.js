@@ -15,6 +15,7 @@ import { connect } from "./utils/db";
 import auth from "./routes/auth.router";
 import user from "./routes/user.router";
 import refreshToken from "./routes/token.router";
+import teacher from "./routes/teacher.router";
 
 export const app = express();
 
@@ -40,6 +41,7 @@ app.use(cookieParser());
 app.use("/auth", auth);
 app.use("/user", user);
 app.use("/refresh", refreshToken);
+app.use("/teacher",teacher);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

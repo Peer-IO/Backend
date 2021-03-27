@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import uniqueValidator from "mongoose-unique-validator";
 import { crudControllers } from "../services/crud";
 
 const userSchema = new mongoose.Schema(
@@ -77,6 +78,8 @@ userSchema.set("toJSON", {
 	versionKey: false,
 });
 
-export const User = mongoose.model("user", userSchema);
+userSchema.plugin(uniqueValidator);
+
+export const User = mongoose.model("User", userSchema);
 
 export default crudControllers(User);
