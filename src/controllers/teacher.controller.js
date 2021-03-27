@@ -34,19 +34,19 @@ export const createCourse = async (req, res, next) => {
 
 export const getCourses = async (req, res) => {
 	if (!req.user.teacher)
-		return res.status(401).json({ "error": "Only Teachers can see course" });
+		return res.status(401).json({ "error": "Only Teachers can see courses" });
 
-	const courses = await courseCrud.getMany({});
+	const courses = await Course.find({instructor:req.user._id}).populate("assignments").select("-createdAt -updatedAt -__v -ta").exec();
 	return res.status(200).json(courses);
 };
 
 export const getCourse = async (req, res) => {
-	const course = await Course.findOne({  _id: req.params.code  }).select("-createdAt -updatedAt -__v -_id").populate({path:"ta", select:"first_name email -_id"}).populate({path:"instructor",select:"first_name email -_id"});
+	const course = await Course.findById(req.params.code).select("-createdAt -updatedAt -__v -_id").populate({path:"ta", select:"first_name email -_id"}).populate({path:"instructor",select:"first_name email -_id"}).populate({path:"assignments",select:"-__v -course"}).exec();
 	return res.json(course);
 };
 
 export const updateCourse = async (req, res, next) => {
-	const searchParam = { instructor: req.user._id, classCode: req.params.code };
+	const searchParam = { instructor: req.user._id, _id: req.params.code };
 
 
 	const validateCode = req.body.code.search(/[^\w\s-]/);
@@ -74,7 +74,7 @@ export const updateCourse = async (req, res, next) => {
 };
 
 export const deleteCourse = async (req, res, next) => {
-	const searchParam = { instructor: req.user._id, code: req.params.code };
+	const searchParam = { instructor: req.user._id, _id: req.params.code };
 	try {
 		let course = await courseCrud.getOneDoc({ findBy: { ...searchParam } });
 		await course.deleteOne();
