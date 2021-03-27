@@ -9,7 +9,7 @@
   "execMap": {
     "js": "node"
   },
-
+  "delay": 2000,
   "runOnChangeOnly": false,
   "watch": [
     "src/**/*.js",

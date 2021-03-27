@@ -5,6 +5,7 @@ const opts = {
 	useUnifiedTopology: true,
 	retryWrites: true,
 	useCreateIndex: true,
+	useFindAndModify: false
 };
 
 export const connect = async (url) => {
