@@ -1,51 +1,38 @@
 import mongoose from "mongoose";
-import { User } from "./user.model";
-import { Submission } from "./submission.model";
+import { crudControllers } from "../services/crud";
 
 const reviewSchema = new mongoose.Schema({
 	course: {
 		type: mongoose.Types.ObjectId,
-		ref: "Course"
+		ref: "Course",
+		required: true
 	},
 	submission: {
 		type: mongoose.Types.ObjectId,
 		ref: "Submission",
+		required: true
 	},
 	assignment: {
 		type: mongoose.Types.ObjectId,
 		ref: "Assigment",
+		required: true
 	},
 	reviewer: {
 		type: mongoose.Types.ObjectId,
 		ref: "User",
+		required: true
 	},
 	remark: {
 		type: String,
 		required: true,
 		trim: true
 	},
-	scores: {
+	score: {
 		type: Number,
 		required: true,
 	},
-});
+}, {timestamps: true});
 
-// updating the reviewer field.
-reviewSchema.post("save", async function(next) {
-	try {
-		let user = await User.findById(this.reviewer);
-		user.reviews.push(this._id);
-		await user.save();
-	} catch (err) {
-		next(err);
-	}
-	try {
-		let sub = await Submission.findById(this.submission);
-		sub.reviews.push(this._id);
-		await sub.save();
-		next();
-	} catch (err) {
-		next(err);
-	}
-});
 export const Review = mongoose.model("Review", reviewSchema);
+
+export default crudControllers(Review);

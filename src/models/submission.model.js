@@ -26,7 +26,7 @@ const submissionSchema = new mongoose.Schema({
 	attachments: [{
 		type: String, // to store the links for the attatchments of a submission in same sequence as those of task.
 	}]
-});
+}, {timestamps: true});
 // Removing the reviews for the submission if it is deleted.
 submissionSchema.pre("deleteOne", { document: true, query: false }, async function(next) {
 	try {

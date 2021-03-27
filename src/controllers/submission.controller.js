@@ -12,7 +12,9 @@ export const createSubmission = async (req, res) => {
 	const assignment = await assignmentCrud.getOneDoc({ findBy: { _id: req.body.assignment} });
 	if(!assignment)
 		return res.status(400).json({message: "Assignment not found."});
-	if(assignment.course != req.body.course)
+	console.log(assignment.course.toString());
+	console.log(req.body.course);
+	if(assignment.course.toString() !== req.body.course)
 		return res.status(400).json({error: "Assignment not found in course."});
 	try {
 		const submission = await submissionCrud.createOne({body:{...req.body, submitter: user._id, reviews: []}});
@@ -92,7 +94,7 @@ export const deleteSubmission = async(req, res) => {
 
 export const getSingleSubmission = async (req, res) => {
 	try {
-		const submission = await submissionCrud.getOne({findBy: {_id: req.params.id}});
+		const submission = await Submission.findById(req.params.id).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
 		if(submission) {
 			return res.status(200).json(submission);
 		} else {
