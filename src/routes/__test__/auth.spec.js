@@ -1,7 +1,7 @@
 import request from "supertest";
 import { app } from "../../app";
 import { auth } from "../../utils/firebase";
-import { setupDB, removeAllCollections } from "../../../test-db-setup";
+import { setupDB } from "../../../test-db-setup";
 setupDB("api-auth-route-testing");
 
 describe("Auth route", () => {
@@ -14,16 +14,12 @@ describe("Auth route", () => {
 		};
 
 		const response = await request("https://identitytoolkit.googleapis.com")
-			.post(`/v1/accounts:signUp?key=${process.env.APIKEY}`)
+			.post(`/v1/accounts:signInWithPassword?key=${process.env.APIKEY}`)
 			.set("Content-Type","application/json")
-			.send(data);
+			.send(data).catch(e => fail(e));
 
 		idToken = response.body.idToken;
 		decodedToken = await auth.verifyIdToken(response.body.idToken);
-	});
-
-	afterAll(async () => {
-		await auth.deleteUser(decodedToken.uid);
 	});
 
 	test("Has correct Decoded Token", () => {
@@ -32,16 +28,21 @@ describe("Auth route", () => {
 		expect(idToken).not.toBeNull();
 	});
 
+	test("SignIn without signup", async () => {
+		const response = await request(app)
+			.post("/auth/signin")
+			.send({ idToken });
+
+		expect(response.statusCode).toBe(404);
+	});
+
+
 	describe("Auth with not verified User", () => {
-		test("SignIn without signup", async () => {
-			const response = await request(app)
-				.post("/auth/signin")
-				.send({ idToken });
+		beforeAll(async () => {
+			await auth.updateUser(decodedToken.uid, {
+				emailVerified:false
+			});
 
-			expect(response.statusCode).toBe(404);
-		});
-
-		test("Signup with not verified User", async () => {
 			const data = {
 				first_name:"Test User",
 				institution: "IIT B",
@@ -58,6 +59,7 @@ describe("Auth route", () => {
 			expect(response.headers).not.toHaveProperty("set-cookie");
 		});
 
+
 		test("SignIn with not verified User", async () => {
 			const response = await request(app)
 				.post("/auth/signin")
@@ -70,19 +72,10 @@ describe("Auth route", () => {
 	describe("Auth with verified User", () => {
 
 		beforeAll(async () => {
-			await removeAllCollections();
 			await auth.updateUser(decodedToken.uid, {
 				emailVerified:true
 			});
-		});
 
-		afterAll(async () => {
-			await auth.updateUser(decodedToken.uid, {
-				emailVerified:false
-			});
-		});
-
-		test("Signup with verified User", async () => {
 			const data = {
 				first_name:"Test User",
 				institution: "IIT B",
@@ -101,6 +94,12 @@ describe("Auth route", () => {
 			expect(response.headers).toHaveProperty("set-cookie");
 			expect(response.headers["set-cookie"].length).toBeGreaterThanOrEqual(1);
 			expect(response.headers["set-cookie"]).toEqual(expect.arrayContaining(expected));
+		});
+
+		afterAll(async () => {
+			await auth.updateUser(decodedToken.uid, {
+				emailVerified:false
+			});
 		});
 
 		test("SignIn with verified User", async () => {

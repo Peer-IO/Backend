@@ -22,7 +22,7 @@ export const updateMe = async (req, res) => {
 	}
 };
 
-export const revokeRefreshToken = (req, res, next) => {
+export const revokeRefreshToken = async (req, res, next) => {
 	const token = req.cookies.refreshToken;
 	const ipAddress = req.ip;
 
@@ -30,7 +30,6 @@ export const revokeRefreshToken = (req, res, next) => {
 	if (!ownsToken(req.user, token))
 		return res.status(401).json({ message: "Unauthorized" });
 
-	revokeToken({ token, ipAddress })
-		.then(() => res.status(204).json({ message: "Token Revoked" }))
-		.catch(next);
+	await revokeToken({ token, ipAddress }).catch(next);
+	return res.sendStatus(204);
 };

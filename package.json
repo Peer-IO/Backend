@@ -8,7 +8,7 @@
     "restart": "rimraf dist && yarn run start",
     "serve": "node dist/firebase_decrypt.js && node dist/index.js",
     "start": "yarn run build && yarn run serve",
-    "test": "cross-env NODE_ENV=testing jest --forceExit --detectOpenHandles  --silent --coverage",
+    "test": "cross-env NODE_ENV=testing jest --detectOpenHandles --runInBand --forceExit --coverage",
     "lint": "eslint . --ext .js --ignore-path .gitignore",
     "lint:fix": "yarn run lint --fix"
   },

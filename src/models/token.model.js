@@ -3,7 +3,7 @@ import { crudControllers } from "../services/crud";
 
 const tokenSchema = Schema(
 	{
-		user: { type: Schema.Types.ObjectId, ref: "user" },
+		user: { type: Schema.Types.ObjectId, ref: "User" },
 		token: String,
 		expires: Date,
 		createdByIp: String,

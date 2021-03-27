@@ -40,6 +40,11 @@ module.exports = {
 			});
 		});
 
+		// Clear collections after each test
+		afterEach(() => {
+			return removeAllCollections();
+		});
+
 		// Disconnect Mongoose
 		afterAll(async () => {
 			await dropAllCollections();

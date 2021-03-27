@@ -9,7 +9,7 @@ setupDB("api-user-route-testing");
 
 describe("Token route", () => {
 	let refreshToken;
-	beforeEach(async () => {
+	beforeAll(async () => {
 		const user = await userCrud.createOne({
 			body: {
 				first_name: "tester",
@@ -22,16 +22,16 @@ describe("Token route", () => {
 			},
 		});
 		refreshToken = generateRefreshToken(user);
-		refreshToken.save();
+		await refreshToken.save();
 		refreshToken = refreshToken.token;
 	});
 
-	test("user end point test", async () => {
+	test("refresh and return tokens", async () => {
 		const results = await request(app)
 			.get("/refresh")
 			.set("Cookie", [`refreshToken=${refreshToken}`]);
 
-		expect(results.statusCode).not.toBe(401);
-		expect(results.body.token).not.toBe(null);
+		expect(results.statusCode).toBe(201);
+		expect(results.body.token).not.toBeNull();
 	});
 });
