@@ -5,8 +5,8 @@ const fileName = config.fileName;
 const serviceAccount = require(`../config/${fileName}`);
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://peer2peer-a77ac.firebaseio.com",
+	credential: admin.credential.cert(serviceAccount),
+	databaseURL: "https://peer2peer-a77ac.firebaseio.com",
 });
 
 export default admin;

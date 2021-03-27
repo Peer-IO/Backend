@@ -1,7 +1,7 @@
 import {
-  me,
-  updateMe,
-  revokeRefreshToken,
+	me,
+	updateMe,
+	revokeRefreshToken,
 } from "../controllers/user.controller";
 import { Router } from "express";
 import { protect } from "../services/auth";
