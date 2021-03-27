@@ -1,0 +1,49 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [master, deploy]
+  pull_request:
+    branches: [master, deploy]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x]
+        mongodb-version: [4.0, 4.4]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: User Nodejs.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.3.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Decrypt Firebase
+        run: yarn build && node dist/firebase_decrypt.js
+        env:
+          KEY_NAME: ${{ secrets.KEY_NAME }}
+          DECRYPT_KEY: ${{ secrets.DECRYPT_KEY }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+
+      - name: Run tests
+        run: yarn test
+        env:
+          APIKEY: ${{ secrets.API_KEY }}
+
+      - name: Build Files
+        run: yarn build

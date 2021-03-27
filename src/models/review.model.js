@@ -5,41 +5,40 @@ import { Submission } from "./submission.model";
 const reviewSchema = new mongoose.Schema({
   submission: {
     type: mongoose.Types.ObjectId,
-    ref: 'Submission'
+    ref: "Submission",
   },
   assignment: {
     type: mongoose.Types.ObjectId,
-    ref: 'Assigment'
+    ref: "Assigment",
   },
   reviewer: {
     type: mongoose.Types.ObjectId,
-    ref: 'User'
+    ref: "User",
   },
   scores: {
-    type: Array, /* scores to be stored in order [[crtron-1, crtron-2, ...], -> task-1 scores
+    type: Array /* scores to be stored in order [[crtron-1, crtron-2, ...], -> task-1 scores
                             criterion scores  <-  [crtron-1, crtron-2, ...], -> task-2 scores
-                                                  ... ]*/
-    required: true
-  }
+                                                  ... ]*/,
+    required: true,
+  },
 });
 
 // updating the reviewer field.
-reviewSchema.post('save', async (next) => {
+reviewSchema.post("save", async (next) => {
   try {
     let user = await User.findById(this.reviewer);
     user.reviews.push(this._id);
     await user.save();
-  } catch(err) {
-    next(err)
-  };
+  } catch (err) {
+    next(err);
+  }
   try {
     sub = await Submission.findById(this.submission);
     sub.reviews.push(this._id);
     await sub.save();
     next();
-  } catch(err) {
+  } catch (err) {
     next(err);
-  };
-}
-);
-export const Review = mongoose.model('Review', reviewSchema),
+  }
+});
+export const Review = mongoose.model("Review", reviewSchema);

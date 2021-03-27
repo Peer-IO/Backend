@@ -1,15 +1,15 @@
-import { newToken } from "../services/auth";
 import userCrud from "../models/user.model";
+import { newToken } from "../services/auth";
 import {
   generateRefreshToken,
-  setTokenCookie,
-  getActiveToken,
+
+  getActiveToken, setTokenCookie
 } from "../services/token";
 
 export const signin = async (req, res, next) => {
   try {
     // find user using uid in request body
-    let user = await userCrud.findOne({ findBy: { uid: req.body.uid } });
+    let user = await userCrud.getOne({ findBy: { uid: req.body.uid } });
 
     // user doesn't exist 404
     if (!user) return res.status(404).send("User not registered");
@@ -17,11 +17,11 @@ export const signin = async (req, res, next) => {
     if (!req.body.email_verified)
       return res.status(401).json({ message: "User not Verified" });
 
-    // update user status
-    user = await userCrud.updateOne({
-      findBy: { _id: req.user._id },
-      updateBody: { email_verified: true },
-    });
+		// Update user status
+		user = await userCrud.updateOne({
+			"findBy": { "_id": user._id },
+			"updateBody": { "email_verified": true }
+		});
 
     let refreshToken = await getActiveToken(user);
     if (!refreshToken) {
@@ -59,11 +59,13 @@ export const signup = async (req, res, next) => {
     const data = await userCrud.createOne({ body: req.body });
     // create jwt token
     const token = newToken(data);
-    // create refresh token and save it
-    const refreshToken = generateRefreshToken(data, req.ip);
-    await refreshToken.save();
-    // set cookie for refreshToken
-    setTokenCookie(res, refreshToken.token);
+    // create refresh token and save it if verified user
+    if (req.body.email_verified) {
+      const refreshToken = generateRefreshToken(data, req.ip);
+      await refreshToken.save();
+      // set cookie for refreshToken
+      setTokenCookie(res, refreshToken.token);
+    }
 
     return res.status(201).send({ token });
   } catch (error) {
