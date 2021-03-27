@@ -7,7 +7,7 @@ export const createReview = async (req, res) => {
 	const submissionId = req.body.submission;
 	const assignmentId = req.body.assignment;
 	const courseId = req.body.course;
-	const submission = await submissionCrud.getOne({findBy: {_id: submissionId}});
+	const submission = await submissionCrud.getOneDoc({findBy: {_id: submissionId}});
 	if(!submission) {
 		return res.status(400).json({error: "Submission does not exists."});
 	}
@@ -35,6 +35,10 @@ export const createReview = async (req, res) => {
 			return res.status(403).json({error: "Self review is not allowed."});
 		} else {
 			const review = await reviewCrud.createOne({body: {...req.body, reviewer: req.user._id}});
+			const newTotalReviews = submission.number_of_reviews + 1;
+			const newAvg = ((submission.avg_score * submission.number_of_reviews) + req.body.score) / newTotalReviews;
+			console.log("hello");
+			await submissionCrud.updateOne({findBy: {_id: submissionId}, updateBody: {number_of_reviews: newTotalReviews, avg_score: newAvg }});
 			return res.status(201).json(review);
 		}
 	} else {
@@ -72,11 +76,23 @@ export const updateReview = async(req, res) => {
 		const review = await reviewCrud.getOneDoc({findBy: {_id: req.params.id}});
 		if(review) {
 			const assignment = await assignmentCrud.getOne({findBy: {_id: review.assignment}});
+			let newAvg, numberOfReviews;
 			if(isUpdatable(assignment)) {
 				if(review.reviewer.toString() !== req.user._id.toString()) {
-					res.status(403).json({error: "You are not reviewer of this review."});
+					res.status(403).json({error: "You have not created this review."});
 				} else {
+					if(req.body.score) {
+						const submission = await submissionCrud.getOneDoc({findBy: {_id: review.submission}});
+						console.log("review.submission", review.submission);
+						console.log("submission._id", submission._id);
+						numberOfReviews = submission.number_of_reviews;
+						newAvg = ((submission.avg_score * submission.number_of_reviews) - review.score + req.body.score) / (numberOfReviews);
+					}
 					const updatedReview = await reviewCrud.updateOne({findBy: {_id: req.params.id}, updateBody: req.body});
+					if(req.body.score) {
+						console.log("hi");
+						await submissionCrud.updateOne({findBy: {_id: review.submission}, updateBody: {avg_score: newAvg, number_of_reviews: numberOfReviews }});
+					}
 					return res.status(200).json(updatedReview);
 				}
 			} else {
@@ -99,7 +115,7 @@ export const deleteReview = async(req, res) => {
 					console.log(review.reviewer);
 					console.log(req.user._id);
 					if(review.reviewer.toString() !== req.user._id.toString()) {
-						res.status(403).json({error: "You are not reviewer of this review."});
+						res.status(403).json({error: "You have not created this review."});
 					} else {
 						await review.deleteOne();
 						res.statusCode = 204;
