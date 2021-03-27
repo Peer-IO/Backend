@@ -1,14 +1,37 @@
 import config from "../config";
 import { User } from "../routes/user/user.model";
 import jwt from "jsonwebtoken";
+import { auth } from "./firebase";
 
-export const newToken = (user) => {
-  return jwt.sign({ id: user.id }, config.secrets.jwt, {
-    expiresIn: config.secrets.jwtExp,
-  });
+// verify firebase token and email verification then only sign in user
+export const verifyIDToken = async (req, res, next) => {
+  const idToken = req.body.idToken;
+  if (!idToken) return res.status(400).send("Token not provided");
+
+  try {
+    const decodedToken = await auth.verifyIdToken(idToken);
+
+    if (decodedToken) {
+      const { emailVerified, email } = await auth.getUser(decodedToken.uid);
+
+      if (!emailVerified) {
+        await auth.generateEmailVerificationLink(email);
+        return res.status(401).send("Email not verified");
+      }
+
+      req.body.email = email;
+      req.body.uid = decodedToken.uid;
+      next();
+    } else {
+      return res.status(401).send("Unauthorized");
+    }
+  } catch (e) {
+    return res.status(401).send("Unauthorized");
+  }
 };
 
-export const verifyToken = (token) =>
+// verify jwt token using secret in config and return user id
+const verifyToken = (token) =>
   new Promise((resolve, reject) => {
     jwt.verify(token, config.secrets.jwt, (err, payload) => {
       if (err) return reject(err);
@@ -16,39 +39,7 @@ export const verifyToken = (token) =>
     });
   });
 
-export const signup = async (req, res) => {
-  if (!req.body.email || !req.body.password)
-    return res.status(400).send({ message: "Email and Password are required" });
-
-  try {
-    const data = await User.create(req.body);
-    const token = newToken(data);
-    return res.status(201).send({ token });
-  } catch (error) {
-    console.log(error);
-    return res.status(400);
-  }
-};
-
-export const signin = async (req, res) => {
-  if (!req.body.email || !req.body.password)
-    return res.status(400).send({ message: "Email and Password are required" });
-
-  const user = await User.findOne({ email: req.body.email }).exec();
-  if (!user) return res.status(404).send({ message: "user must be real" });
-
-  try {
-    const match = await user.checkPassword(req.body.password);
-    if (!match) return res.status(401).send({ message: "password must match" });
-
-    const token = newToken(user);
-    return res.status(201).send({ token });
-  } catch (error) {
-    console.log(error);
-    return res.status(400);
-  }
-};
-
+// check header for authorization token prefixed with Bearer and then fetch user and add to request object
 export const protect = async (req, res, next) => {
   const token = req.headers.authorization;
   if (!token) return res.status(401).end();
@@ -58,10 +49,7 @@ export const protect = async (req, res, next) => {
 
   try {
     const payload = await verifyToken(tokenVal);
-    const user = await User.findById(payload.id)
-      .select("-password")
-      .lean()
-      .exec();
+    const user = await User.findById(payload.id).lean().exec();
     req.user = user;
     next();
   } catch (error) {
