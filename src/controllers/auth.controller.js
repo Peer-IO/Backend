@@ -84,3 +84,20 @@ export const signup = async (req, res, next) => {
 		next(error);
 	}
 };
+
+// (async function temp() {
+// 	const body = {
+// 		"first_name":"meluhan",
+// 		"last_name":"Tiwari",
+// 		"institution":"KCNIT",
+// 		"email":"purushottammisc@gmail.com",
+// 		"roll_number":19074022
+// 	};
+// 	try {
+// 		const data = await userCrud.createOne({"body": body});
+// 		const token = newToken(data);
+// 		console.log("token =", token);
+// 	} catch(err) {
+// 		console.log("error =", err.message);
+// 	}
+// }());

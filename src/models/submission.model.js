@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { User } from "./user.model";
 import { Assignment } from "./assignment.model";
+import { Review } from "./review.model";
 
 const submissionSchema = new mongoose.Schema({
 	course: {
@@ -42,5 +43,13 @@ submissionSchema.post("save", async function (next) {
 		next(err);
 	}
 });
-
+// Removing the reviews for the submission if it is deleted.
+submissionSchema.pre("deleteOne", { document: true, query: false }, async function(next) {
+	try {
+		await Review.deleteMany({submission: this._id});
+	} catch(err) {
+		next(err);
+	}
+	next();
+});
 export const Submission = mongoose.model("Submission", submissionSchema);

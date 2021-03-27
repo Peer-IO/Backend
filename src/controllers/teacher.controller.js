@@ -16,7 +16,7 @@ export const createCourse = async (req, res, next) => {
 
 	try {
 		let ta = [];
-		if (req.body.ta.length) {
+		if (req.body.ta) {
 			ta = await Promise.all(req.body.ta.map(email => User.findOne({ email }).select("_id").exec()));
 			ta = ta.filter(Boolean);
 			ta = ta.map(val => val._id);

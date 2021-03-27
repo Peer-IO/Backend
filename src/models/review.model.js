@@ -3,6 +3,10 @@ import { User } from "./user.model";
 import { Submission } from "./submission.model";
 
 const reviewSchema = new mongoose.Schema({
+	course: {
+		type: mongoose.Types.ObjectId,
+		ref: "Course"
+	},
 	submission: {
 		type: mongoose.Types.ObjectId,
 		ref: "Submission",
