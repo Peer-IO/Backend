@@ -41,7 +41,7 @@ export const getCourses = async (req, res) => {
 };
 
 export const getCourse = async (req, res) => {
-	const course = await Course.findOne({  classCode: req.params.code  }).select("-createdAt -updatedAt -__v -_id").populate({path:"ta", select:"first_name email -_id"}).populate({path:"instructor",select:"first_name email -_id"});
+	const course = await Course.findOne({  _id: req.params.code  }).select("-createdAt -updatedAt -__v -_id").populate({path:"ta", select:"first_name email -_id"}).populate({path:"instructor",select:"first_name email -_id"});
 	return res.json(course);
 };
 
@@ -74,7 +74,7 @@ export const updateCourse = async (req, res, next) => {
 };
 
 export const deleteCourse = async (req, res, next) => {
-	const searchParam = { instructor: req.user._id, code: req.params.code };
+	const searchParam = { instructor: req.body.user._id, code: req.params.code };
 	try {
 		let course = await courseCrud.getOneDoc({ findBy: { ...searchParam } });
 		await course.deleteOne();

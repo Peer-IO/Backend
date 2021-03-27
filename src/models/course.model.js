@@ -46,14 +46,11 @@ const courseSchema = new mongoose.Schema(
 
 courseSchema.pre("deleteOne", { document: true, query: false }, async function(next) {
 	const promiseArray = [];
-	console.log("hello");
-	console.log("id =",this._id);
 	try {
 		promiseArray.push(Assignment.deleteMany({course: this._id}));
 		promiseArray.push(Submission.deleteMany({course: this._id}));
 		promiseArray.push(Review.deleteMany({course: this._id}));
 		await Promise.all(promiseArray);
-		console.log("All promises resolved");
 	} catch(err) {
 		next(err);
 	}

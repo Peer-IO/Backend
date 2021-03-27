@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { taskSchema } from "./schemas/task.schema";
 import { crudControllers } from "../services/crud";
 import { Submission } from "./submission.model";
 import { Review } from "./review.model";
@@ -18,12 +17,28 @@ const assignmentSchema = new mongoose.Schema(
 			type: mongoose.Types.ObjectId,
 			ref: "Course"
 		},
-		tasks: [taskSchema],
 		submissions: [{
 			type: mongoose.Types.ObjectId,
 			ref: "Submission",
 		}],
-	}
+		totalPoints: {
+			type: Number,
+			required: true
+		},
+		submissionDeadline: {
+			type: Date,
+			required: true
+		},
+		reviewDeadline: {
+			type: Date,
+			required: true
+		},
+		attachments: {
+			type: [
+				String
+			]
+		}
+	}, {timestamps: true}
 );
 
 assignmentSchema.pre("deleteOne", { document: true, query: false }, async function(next) {

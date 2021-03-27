@@ -7,7 +7,11 @@ import {
 	deleteAssignment,
 	forbidden,
 } from "../controllers/assignment.controller";
+import { protect } from "../services/auth";
+
 const router = Router();
+
+router.use(protect);
 
 router
 	.route("/")

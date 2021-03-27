@@ -11,7 +11,6 @@ export const getAllAssignments = async (req, res, next) => {
 };
 
 export const addAssignment = async (req, res, next) => {
-	console.table(req.body);
 	try {
 		const newAssignment = await assignmentCrud.createOne({body: req.body});
 		const course = await courseCrud.getOneDoc({ findBy: { _id: req.query.courseId } });
@@ -25,13 +24,13 @@ export const addAssignment = async (req, res, next) => {
 
 export const deleteAssignment = async (req, res, next) => {
 	const assignmentId = req.params.id;
-	const courseId = req.bodycourseId;
+	const courseId = req.body.course;
 	try {
 		let assignment = await assignmentCrud.getOneDoc({ _id: assignmentId });
 		await assignment.deleteOne();
-		const course = await courseCrud.getOneDoc({ _id: courseId });
-		course.assignments = course.assignments.filter( assign => (assign !== assignmentId) );
-		await course.save();
+		const findBy = { _id: courseId };
+		const updateBody = { $pull: { assignments: assignmentId }};
+		await courseCrud.updateOne({ findBy, updateBody });
 		res.statusCode = 204;
 		res.send();
 	} catch(err) {
