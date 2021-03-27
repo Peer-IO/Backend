@@ -49,7 +49,7 @@ export const protect = async (req, res, next) => {
 
   try {
     const payload = await verifyToken(tokenVal);
-    const user = await User.findById(payload.id).lean().exec();
+    const user = await User.findById({ _id: payload.id }).lean().exec();
     req.user = user;
     next();
   } catch (error) {
