@@ -40,15 +40,11 @@ module.exports = {
 			});
 		});
 
-		// Cleans up database between each test
-		afterEach(async () => {
-			await removeAllCollections();
-		});
-
 		// Disconnect Mongoose
 		afterAll(async () => {
 			await dropAllCollections();
 			await mongoose.connection.close();
 		});
 	},
+	removeAllCollections,
 };

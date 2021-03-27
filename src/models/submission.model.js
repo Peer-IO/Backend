@@ -25,7 +25,7 @@ const submissionSchema = new mongoose.Schema({
 });
 
 // updating the related assignment and user with submission id.
-submissionSchema.post("save", async (next) => {
+submissionSchema.post("save", async function (next) {
 	try {
 		let student = await User.findById(this.submitter);
 		student.submissions.push(this._id);

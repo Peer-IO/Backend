@@ -22,7 +22,7 @@ const assignmentSchema = new mongoose.Schema(
 );
 
 // updating the related course with assignment id.
-assignmentSchema.post("save",async (next) => {
+assignmentSchema.post("save",async function(next) {
 	try {
 		let relatedCourse = await Course.findById(this.course);
 		relatedCourse.assignments.push(this._id);

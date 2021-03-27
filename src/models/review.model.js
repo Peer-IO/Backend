@@ -24,7 +24,7 @@ const reviewSchema = new mongoose.Schema({
 });
 
 // updating the reviewer field.
-reviewSchema.post("save", async (next) => {
+reviewSchema.post("save", async function(next) {
 	try {
 		let user = await User.findById(this.reviewer);
 		user.reviews.push(this._id);

@@ -11,7 +11,19 @@ export const verifyIDToken = async (req, res, next) => {
 		const decodedToken = await auth.verifyIdToken(idToken);
 
 		if (decodedToken) {
-			const { email, emailVerified } = await auth.getUser(decodedToken.uid);
+			let { email, emailVerified, providerData } = await auth.getUser(decodedToken.uid);
+
+			const providers = ["google.com", "github.com", "facebook.com"];
+
+			if (!emailVerified) {
+				const result = providerData.some((userInfo) => providers.some((provider) => provider === userInfo.providerId));
+				if (result) {
+					emailVerified = true;
+					await auth.updateUser(decodedToken.uid, {
+						emailVerified: true
+					});
+				}
+			}
 
 			req.body.email = email;
 			req.body.uid = decodedToken.uid;
