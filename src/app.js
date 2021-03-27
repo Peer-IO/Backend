@@ -5,8 +5,10 @@ import helmet from "helmet";
 import { json, urlencoded } from "body-parser";
 import logger from "morgan";
 import cors from "cors";
-import { connect } from "./utils/db";
 import compression from "compression";
+
+// db connect
+import { connect } from "./utils/db";
 
 //routers
 import auth from "./routes/auth/auth.router";
@@ -46,13 +48,13 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+  res.status(err.status || 500).json({ message: err });
 });
 
-export const start = () => {
-  app.listen(3000, () => {
-    console.log("server on port 3000");
+export const start = ({ port, dbURL }) => {
+  app.listen(port, () => {
+    console.log(`server on port ${port}`);
   });
-  connect();
+
+  connect(dbURL);
 };

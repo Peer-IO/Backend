@@ -1,3 +1,7 @@
-import {start} from "./app"
+import { start } from "./app";
+import config from "./config";
 
-start()
+const dbURL = config.url ?? config.dbURL;
+const port = config.port;
+
+start({ dbURL, port });

@@ -1,6 +1,8 @@
 import admin from "firebase-admin";
+import config from "../config";
 
-const serviceAccount = require("../config/peer2peer-firebase.json");
+const fileName = config.fileName;
+const serviceAccount = require(`../config/${fileName}`);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
