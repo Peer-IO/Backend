@@ -60,7 +60,20 @@ export const getSubmission = async (req, res) => {
 				const submissions = await Submission.find(findBy)
 					.populate({ path: "assignment", select: "title totalPoints _id" })
 					.populate({ path: "course", select: "name _id" })
-					.populate({ path: "submitter", select: "first_name email _id" });
+					.populate({
+						path: "submitter",
+						select: "first_name last_name roll_number email _id",
+					})
+					.populate({
+						path: "reviews",
+						select: "remark score",
+						populate: {
+							path: "reviewer",
+							model: "User",
+							select: "first_name last_name roll_number email institution",
+						},
+					})
+					.lean();
 				return res.status(200).json(submissions);
 			} else if (courseId && assignmentId) {
 				// returns all submissions of a user for a given assignment in given course.
@@ -70,7 +83,20 @@ export const getSubmission = async (req, res) => {
 				const submissions = await Submission.find(findBy)
 					.populate({ path: "assignment", select: "title totalPoints _id" })
 					.populate({ path: "course", select: "name _id" })
-					.populate({ path: "submitter", select: "first_name email _id" });
+					.populate({
+						path: "submitter",
+						select: "first_name last_name roll_number email _id",
+					})
+					.populate({
+						path: "reviews",
+						select: "remark score",
+						populate: {
+							path: "reviewer",
+							model: "User",
+							select: "first_name last_name roll_number email institution",
+						},
+					})
+					.lean();
 				return res.status(200).json(submissions);
 			}
 		} else if (userSpecific === "F") {
@@ -87,7 +113,20 @@ export const getSubmission = async (req, res) => {
 					const submissions = await Submission.find(findBy)
 						.populate({ path: "assignment", select: "title totalPoints _id" })
 						.populate({ path: "course", select: "name _id" })
-						.populate({ path: "submitter", select: "first_name email _id" });
+						.populate({
+							path: "submitter",
+							select: "first_name last_name roll_number email _id",
+						})
+						.populate({
+							path: "reviews",
+							select: "remark score",
+							populate: {
+								path: "reviewer",
+								model: "User",
+								select: "first_name last_name roll_number email institution",
+							},
+						})
+						.lean();
 					return res.status(200).json(submissions);
 				} else {
 					return res
@@ -144,7 +183,20 @@ export const getSingleSubmission = async (req, res) => {
 		const submission = await Submission.findById(req.params.id)
 			.populate({ path: "assignment", select: "title totalPoints _id" })
 			.populate({ path: "course", select: "name _id" })
-			.populate({ path: "submitter", select: "first_name email _id" });
+			.populate({
+				path: "submitter",
+				select: "first_name last_name roll_number email _id",
+			})
+			.populate({
+				path: "reviews",
+				select: "remark score",
+				populate: {
+					path: "reviewer",
+					model: "User",
+					select: "first_name last_name roll_number email institution",
+				},
+			})
+			.lean();
 		if (submission) {
 			return res.status(200).json(submission);
 		} else {
@@ -218,7 +270,10 @@ export const getReviewedSubmissions = async (req, res) => {
 				})
 					.populate({ path: "assignment", select: "title totalPoints _id" })
 					.populate({ path: "course", select: "name _id" })
-					.populate({ path: "submitter", select: "first_name last_name roll_number email _id" })
+					.populate({
+						path: "submitter",
+						select: "first_name last_name roll_number email _id",
+					})
 					.populate({
 						path: "reviews",
 						select: "remark score",
@@ -256,7 +311,10 @@ export const getInPhaseSubmissions = async (req, res) => {
 			})
 				.populate({ path: "assignment", select: "title totalPoints _id" })
 				.populate({ path: "course", select: "name _id" })
-				.populate({ path: "submitter", select: "first_name last_name roll_number email _id" })
+				.populate({
+					path: "submitter",
+					select: "first_name last_name roll_number email _id",
+				})
 				.populate({
 					path: "reviews",
 					select: "remark score",

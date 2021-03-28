@@ -1,9 +1,9 @@
-import userCrud from "../models/user.model";
 import { newToken } from "../services/auth";
+import userCrud from "../models/user.model";
 import {
-  generateRefreshToken,
-
-  getActiveToken, setTokenCookie
+	generateRefreshToken,
+	setTokenCookie,
+	getActiveToken
 } from "../services/token";
 
 export const signin = async (req, res, next) => {
@@ -22,7 +22,7 @@ export const signin = async (req, res, next) => {
 
 		// Update user status
 		user = await userCrud.updateOne({
-			"findBy": { "_id": req.user._id },
+			"findBy": { "_id": user._id },
 			"updateBody": { "email_verified": true }
 		});
 
