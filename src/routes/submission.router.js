@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { protect } from "../services/auth";
-import { getSubmission, createSubmission, deleteSubmission, getSingleSubmission, updateSubmission } from "../controllers/submission.controller";
+import { getSubmission, createSubmission, deleteSubmission, getSingleSubmission, updateSubmission, getReviewedSubmissions, getInPhaseSubmissions } from "../controllers/submission.controller";
 import { forbidden } from "../services/controller";
 
 const router = Router();
@@ -13,6 +13,13 @@ router
 	.put(forbidden)
 	.post(createSubmission)
 	.delete(forbidden);
+router
+	.route("/get-reviewed")
+	.get(getReviewedSubmissions);
+
+router
+	.route("/get-in-phase")
+	.get(getInPhaseSubmissions);
 
 router
 	.route("/:id")

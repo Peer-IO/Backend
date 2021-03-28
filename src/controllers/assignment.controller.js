@@ -39,15 +39,19 @@ export const deleteAssignment = async (req, res) => {
 	const courseId = req.body.course;
 	try {
 		let assignment = await Assignment.findById(assignmentId).populate({path: "course", select: "instructor _id"});
-		if(assignment.course.instructor.toString() === req.user._id.toString()) {
-			await assignment.deleteOne();
-			const findBy = { _id: courseId };
-			const updateBody = { $pull: { assignments: assignmentId }};
-			await courseCrud.updateOne({ findBy, updateBody });
-			res.statusCode = 204;
-			res.send();
+		if(assignment) {
+			if(assignment.course.instructor.toString() === req.user._id.toString()) {
+				await assignment.deleteOne();
+				const findBy = { _id: courseId };
+				const updateBody = { $pull: { assignments: assignmentId }};
+				await courseCrud.updateOne({ findBy, updateBody });
+				res.statusCode = 204;
+				res.send();
+			} else {
+				return res.status(403).json({error: "You are not creator of the assignment."});
+			}
 		} else {
-			return res.status(403).json({error: "You are not creator of the assignment."});
+			return res.status(404).json({error: "Assignment not found!"});
 		}
 	} catch(err) {
 		return res.status(400).json({error: err.message});

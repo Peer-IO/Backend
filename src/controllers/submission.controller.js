@@ -88,29 +88,32 @@ export const deleteSubmission = async(req, res) => {
 	const submissionId = req.params.id;
 	try {
 		const submission = await submissionCrud.getOneDoc({findBy: {_id: submissionId}});
-		const submitterId = submission.submitter.toString();
-		const userId = req.user._id.toString();
-		if(submitterId === userId){
-			const assignment = await assignmentCrud.getOne({findBy: {_id: req.body.assignment}});
-			if(assignment) {
-				if(submission && assignment._id.toString() === submission.assignment.toString()) {
-					if(isSubmissionUpdatable(assignment)) {
-						await submissionCrud.getOneDoc({findBy: {_id: submissionId}});
-						submission.deleteOne();
-						res.statusCode = 204;
-						return res.send();
+		if(submission) {
+			const submitterId = submission.submitter.toString();
+			const userId = req.user._id.toString();
+			if(submitterId === userId){
+				const assignment = await assignmentCrud.getOne({findBy: {_id: req.body.assignment}});
+				if(assignment) {
+					if(submission && assignment._id.toString() === submission.assignment.toString()) {
+						if(isSubmissionUpdatable(assignment)) {
+							submission.deleteOne();
+							res.statusCode = 204;
+							return res.send();
+						} else {
+							return res.status(403).json({error: "Submission Deadline is over."});
+						}
 					} else {
-						return res.status(403).json({error: "Submission Deadline is over."});
+						console.log("submission:", submission);
+						return res.status(400).json({error: "Submission is not for given assignment."});
 					}
 				} else {
-					console.log("submission:", submission);
-					return res.status(400).json({error: "Submission is not for given assignment."});
+					return res.status(404).json({error: "Assignment does not exists."});
 				}
 			} else {
-				return res.status(404).json({error: "Assignment does not exists."});
+				return res.status(400).json({error: "Only submitter can delete the submission."});
 			}
 		} else {
-			return res.status(400).json({error: "Only submitter can delete the submission."});
+			return res.status(404).json({error: "Submission does not exists."});
 		}
 	} catch(err) {
 		console.log(err);
@@ -158,5 +161,41 @@ export const updateSubmission = async (req, res) => {
 	} catch(err) {
 		console.log(err);
 		return res.status(400).json({error: err.message});
+	}
+};
+export const getReviewedSubmissions = async (req, res) => {
+	if(req.user.teacher) {
+		const assignment = await assignmentCrud.getOne({findBy: {_id: req.query.assignmentId}});
+		const courseId = req.query.courseId;
+		if(assignment) {
+			if(assignment.course.toString() === req.query.courseId) {
+				const submissions = await Submission.find({number_of_reviews: {"$gte": 3}, course: courseId, assignment: assignment._id}).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
+				return res.status(200).json(submissions);
+			} else {
+				return res.status(400).json({error: "Course is not of provided assignment."});
+			}
+		} else {
+			return res.status(400).json({error: "Assignment not found."});
+		}
+	} else {
+		return res.status(403).json({error: "Only available to instructor."});
+	}
+};
+export const getInPhaseSubmissions = async (req, res) => {
+	if(req.user.teacher) {
+		const assignment = await assignmentCrud.getOne({findBy: {_id: req.query.assignmentId}});
+		const courseId = req.query.courseId;
+		if(assignment) {
+			if(assignment.course.toString() === req.query.courseId) {
+				const submissions = await Submission.find({number_of_reviews: {"$lt": 3}, course: courseId, assignment: assignment._id}).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
+				return res.status(200).json(submissions);
+			} else {
+				return res.status(400).json({error: "Course is not of provided assignment."});
+			}
+		} else {
+			return res.status(400).json({error: "Assignment not found."});
+		}
+	} else {
+		return res.status(403).json({error: "Only available to instructor."});
 	}
 };
