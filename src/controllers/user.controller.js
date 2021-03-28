@@ -37,7 +37,7 @@ export const revokeRefreshToken = async (req, res, next) => {
 
 export const mycourses = async (req, res, next) => {
 	try {
-		const {courses} = await User.findById(req.user._id).select("courses").populate({path:"courses",select:"-ta -instructor -__v -createdAt -updatedAt"}).populate("courses.assignments").lean().exec();
+		const {courses} = await User.findById(req.user._id).select("courses").populate({path:"courses",select:"-ta -instructor -__v -createdAt -updatedAt", populate: {path:"assignments", model: "Assignment"}}).lean().exec();
 		return res.status(200).json({courses});
 	}
 	catch (e) {

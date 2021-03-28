@@ -65,9 +65,12 @@ export const createReview = async (req, res) => {
 			const review = await reviewCrud.createOne({
 				body: { ...req.body, reviewer: req.user._id },
 			});
-			const newTotalReviews = submission.number_of_reviews + 1;
+			const newTotalReviews =
+        Number.parseFloat(submission.number_of_reviews) + 1;
 			const newAvg =
-        (submission.avg_score * submission.number_of_reviews + req.body.score) /
+        (Number.parseFloat(submission.avg_score) *
+          Number.parseFloat(submission.number_of_reviews) +
+          Number.parseFloat(req.body.score)) /
         newTotalReviews;
 			await submissionCrud.updateOne({
 				findBy: { _id: submissionId },
@@ -144,11 +147,12 @@ export const updateReview = async (req, res) => {
 						});
 						console.log("review.submission", review.submission);
 						console.log("submission._id", submission._id);
-						numberOfReviews = submission.number_of_reviews;
+						numberOfReviews = Number.parseFloat(submission.number_of_reviews);
 						newAvg =
-              (submission.avg_score * submission.number_of_reviews -
-                review.score +
-                req.body.score) /
+              (Number.parseFloat(submission.avg_score) *
+                Number.parseFloat(submission.number_of_reviews) -
+                Number.parseFloat(review.score) +
+                Number.parseFloat(req.body.score)) /
               numberOfReviews;
 					}
 					const updatedReview = await reviewCrud.updateOne({
