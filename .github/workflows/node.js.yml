@@ -40,10 +40,5 @@ jobs:
           DECRYPT_KEY: ${{ secrets.DECRYPT_KEY }}
           NODE_ENV: ${{ secrets.NODE_ENV }}
 
-      - name: Run tests
-        run: yarn test
-        env:
-          APIKEY: ${{ secrets.API_KEY }}
-
       - name: Build Files
         run: yarn build
