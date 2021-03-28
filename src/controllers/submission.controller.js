@@ -91,23 +91,14 @@ export const deleteSubmission = async(req, res) => {
 		if(submission) {
 			const submitterId = submission.submitter.toString();
 			const userId = req.user._id.toString();
-			if(submitterId === userId){
-				const assignment = await assignmentCrud.getOne({findBy: {_id: req.body.assignment}});
-				if(assignment) {
-					if(submission && assignment._id.toString() === submission.assignment.toString()) {
-						if(isSubmissionUpdatable(assignment)) {
-							submission.deleteOne();
-							res.statusCode = 204;
-							return res.send();
-						} else {
-							return res.status(403).json({error: "Submission Deadline is over."});
-						}
-					} else {
-						console.log("submission:", submission);
-						return res.status(400).json({error: "Submission is not for given assignment."});
-					}
+			if (submitterId === userId) {
+				const assignment = await assignmentCrud.getOne({ findBy: { _id: submission.assignment } });
+				if(isSubmissionUpdatable(assignment)) {
+					submission.deleteOne();
+					res.statusCode = 204;
+					return res.send();
 				} else {
-					return res.status(404).json({error: "Assignment does not exists."});
+					return res.status(403).json({error: "Submission Deadline is over."});
 				}
 			} else {
 				return res.status(400).json({error: "Only submitter can delete the submission."});

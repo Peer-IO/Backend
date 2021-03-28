@@ -59,8 +59,8 @@ export const deleteAssignment = async (req, res) => {
 };
 
 export const getAssignment = async (req, res, next) => {
-	const assignmentId = req.params.assignmentId;
-	const assignment = await assignmentCrud.getOne({ findBy: assignmentId }).catch(next);
+	const assignmentId = req.params.id;
+	const assignment = await assignmentCrud.getOne({ findBy: { _id: assignmentId } }).catch(next);
 	return res.status(200).json(assignment);
 };
 

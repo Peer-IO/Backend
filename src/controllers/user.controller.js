@@ -36,8 +36,13 @@ export const revokeRefreshToken = async (req, res, next) => {
 };
 
 export const mycourses = async (req, res, next) => {
-	const {courses} = await User.findOne({ ...req.user }).populate("courses","courses.assignments").select("courses").lean().exec();
-	return res.status(200).send(courses);
+	try {
+		const {courses} = await User.findById(req.user._id).select("courses").populate({path:"courses",select:"-ta -instructor -__v -createdAt -updatedAt"}).populate("courses.assignments").lean().exec();
+		return res.status(200).json({courses});
+	}
+	catch (e) {
+		next(e);
+	}
 };
 
 export const registercourse = async (req, res, next) => {
