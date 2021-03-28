@@ -160,8 +160,8 @@ export const getReviewedSubmissions = async (req, res) => {
 		const courseId = req.query.courseId;
 		if(assignment) {
 			if(assignment.course.toString() === req.query.courseId) {
-				const submissions = await Submission.find({number_of_reviews: {"$gte": 3}, course: courseId, assignment: assignment._id}).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
-				return res.status(200).json(submissions);
+				const submissions = await Submission.find({number_of_reviews: {"$gte": 3}, course: courseId, assignment: assignment._id}).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"}).populate({path:"reviews", select:"remark score reviewer"}).lean();
+				return res.status(200).json({submissions});
 			} else {
 				return res.status(400).json({error: "Course is not of provided assignment."});
 			}
@@ -173,20 +173,17 @@ export const getReviewedSubmissions = async (req, res) => {
 	}
 };
 export const getInPhaseSubmissions = async (req, res) => {
-	if(req.user.teacher) {
-		const assignment = await assignmentCrud.getOne({findBy: {_id: req.query.assignmentId}});
-		const courseId = req.query.courseId;
-		if(assignment) {
-			if(assignment.course.toString() === req.query.courseId) {
-				const submissions = await Submission.find({number_of_reviews: {"$lt": 3}, course: courseId, assignment: assignment._id}).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"});
-				return res.status(200).json(submissions);
-			} else {
-				return res.status(400).json({error: "Course is not of provided assignment."});
-			}
+	const assignment = await assignmentCrud.getOne({findBy: {_id: req.query.assignmentId}});
+	const courseId = req.query.courseId;
+	if(assignment) {
+		if(assignment.course.toString() === req.query.courseId) {
+			const submissions = await Submission.find({number_of_reviews: {"$lt": 3}, course: courseId, assignment: assignment._id}).populate({path: "assignment", select: "title totalPoints _id"}).populate({path: "course", select: "name _id"}).populate({path: "submitter", select: "first_name email _id"}).populate({path:"reviews"}).lean().exec();
+			return res.status(200).json(submissions);
 		} else {
-			return res.status(400).json({error: "Assignment not found."});
+			return res.status(400).json({error: "Course is not of provided assignment."});
 		}
 	} else {
-		return res.status(403).json({error: "Only available to instructor."});
+		return res.status(400).json({error: "Assignment not found."});
 	}
+
 };

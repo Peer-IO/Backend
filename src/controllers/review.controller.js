@@ -39,6 +39,8 @@ export const createReview = async (req, res) => {
 			const newAvg = ((submission.avg_score * submission.number_of_reviews) + req.body.score) / newTotalReviews;
 			console.log("hello");
 			await submissionCrud.updateOne({findBy: {_id: submissionId}, updateBody: {number_of_reviews: newTotalReviews, avg_score: newAvg }});
+			submission.reviews.push(review._id);
+			await submission.save();
 			return res.status(201).json(review);
 		}
 	} else {
